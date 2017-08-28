@@ -591,19 +591,20 @@ class SSDMetaArch(model.DetectionModel):                 #this is the model meta
         run.
     """
     variables_to_restore = {}
-    for variable in tf.all_variables():
-      if variable.op.name.startswith(self._extract_features_scope):
-        var_name = variable.op.name
-        if not from_detection_checkpoint:
+    for variable in tf.all_variables():      #all the variacles 
+#We only re_stor variables names started with feature extractor . No others this is good      
+      if variable.op.name.startswith(self._extract_features_scope):  #Select the variables with the feature_extractor title 
+        var_name = variable.op.name          #This means we will extract the variables scoped by the feature extrators 
+        if not from_detection_checkpoint:  #Here we are detecting from a detection network 
           var_name = (
-              re.split('^' + self._extract_features_scope + '/', var_name)[-1])
+              ('^' + self._extract_features_scope + '/', var_name)[-1])  #We don't restore weights for classification chckpoints 
         variables_to_restore[var_name] = variable
-    # TODO: Load variables selectively using scopes.
+    # TODO: Load variables selectively using scopes. 
     variables_to_restore = (
         variables_helper.get_variables_available_in_checkpoint(
-            variables_to_restore, checkpoint_path))
+            variables_to_restore, checkpoint_path))     #In the SSD we re store the weights for feature extractors 
     saver = tf.train.Saver(variables_to_restore)
 
     def restore(sess):
       saver.restore(sess, checkpoint_path)
-    return restore
+    return restore            re.split
