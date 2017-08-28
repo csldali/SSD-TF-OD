@@ -219,7 +219,7 @@ def train(create_tensor_dict_fn, create_model_fn, train_config, master, task,
 
     sync_optimizer = None
     if train_config.sync_replicas:
-      training_optimizer = tf.SyncReplicasOptimizer(
+      training_optimizer = tf.SyncReplicasOptimizer(     #This is more of synchronising the optimizer because there are repicas doing optimizing
           training_optimizer,
           replicas_to_aggregate=train_config.replicas_to_aggregate,
           total_num_replicas=train_config.worker_replicas)
@@ -227,18 +227,18 @@ def train(create_tensor_dict_fn, create_model_fn, train_config, master, task,
 
     # Create ops required to initialize the model from a given checkpoint.
     init_fn = None
-    if train_config.fine_tune_checkpoint:
-      init_fn = detection_model.restore_fn(
+    if train_config.fine_tune_checkpoint:    #This is the checkpoint path file 
+      init_fn = detection_model.restore_fn(          #Re storing the weights from the feature extractors 
           train_config.fine_tune_checkpoint,
-          from_detection_checkpoint=train_config.from_detection_checkpoint)
+          from_detection_checkpoint=train_config.from_detection_checkpoint)      #This is more of the initializer which is re-stored from check points  
 
     with tf.device(deploy_config.optimizer_device()):
-      total_loss, grads_and_vars = model_deploy.optimize_clones(
+      total_loss, grads_and_vars = model_deploy.optimize_clones(      #This gives the total loss and also the grad and var pairs (Tuple) 
           clones, training_optimizer, regularization_losses=None)
       total_loss = tf.check_numerics(total_loss, 'LossTensor is inf or nan.')
 
       # Optionally multiply bias gradients by train_config.bias_grad_multiplier.
-      if train_config.bias_grad_multiplier:
+      if train_config.bias_grad_multiplier:          #We have not initialized a bias gradient multiplier 
         biases_regex_list = ['.*/biases']
         grads_and_vars = variables_helper.multiply_gradients_matching_regex(
             grads_and_vars,
@@ -246,10 +246,13 @@ def train(create_tensor_dict_fn, create_model_fn, train_config, master, task,
             multiplier=train_config.bias_grad_multiplier)
 
       # Optionally freeze some layers by setting their gradients to be zero.
-      if train_config.freeze_variables:
-        grads_and_vars = variables_helper.freeze_gradients_matching_regex(
-            grads_and_vars, train_config.freeze_variables)
-
+      if train_config.freeze_variables:                       #Here we are not freezing any may be it's good to freeze the
+#This will be usefult to go through the variables 
+        print("Priting the grad_and_vars to check the tuples ")
+        print(grad_and_vars) 
+        grads_and_vars = variables_helper.freeze_gradients_matching_regex(  #input to this also grads and vars which means 
+            grads_and_vars, train_config.freeze_variables)     #This function will output 
+                                            #We are getiing gradients and of their varaibles exept the froxen list 
       # Optionally clip gradients
       if train_config.gradient_clipping_by_norm > 0:
         with tf.name_scope('clip_grads'):
@@ -257,9 +260,9 @@ def train(create_tensor_dict_fn, create_model_fn, train_config, master, task,
               grads_and_vars, train_config.gradient_clipping_by_norm)
 
       # Create gradient updates.
-      grad_updates = training_optimizer.apply_gradients(grads_and_vars,
+      grad_updates = training_optimizer.apply_gradients(grads_and_vars,        #updating the gradinets list 
                                                         global_step=global_step)
-      update_ops.append(grad_updates)
+      update_ops.append(grad_updates) #Here the new updated variables 
 
       update_op = tf.group(*update_ops)
       with tf.control_dependencies([update_op]):
@@ -288,10 +291,10 @@ def train(create_tensor_dict_fn, create_model_fn, train_config, master, task,
 
     # Save checkpoints regularly.
     keep_checkpoint_every_n_hours = train_config.keep_checkpoint_every_n_hours
-    saver = tf.train.Saver(
+    saver = tf.train.Saver(                  #saving the checkpoints 
         keep_checkpoint_every_n_hours=keep_checkpoint_every_n_hours)
 
-    slim.learning.train(
+    slim.learning.train(             #Training the network using a compact function 
         train_tensor,
         logdir=train_dir,
         master=master,
