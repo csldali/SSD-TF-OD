@@ -164,7 +164,7 @@ def multiclass_non_max_suppression(boxes,
     return sorted_boxes
 
 
-def batch_multiclass_non_max_suppression(boxes,
+def batch_multiclass_non_max_suppression(boxes,                   #this is imporatant in the inference face 
                                          scores,
                                          score_thresh,
                                          iou_thresh,
@@ -268,10 +268,10 @@ def batch_multiclass_non_max_suppression(boxes,
       nmsed_boxlist = multiclass_non_max_suppression(
           per_image_boxes,
           per_image_scores,
-          score_thresh,
-          iou_thresh,
-          max_size_per_class,
-          max_total_size,
+          score_thresh, #to remove the low scoring boudning boxes 
+          iou_thresh,    #This is to play with NMN 
+          max_size_per_class, #maximum nunbemr of detections per a class  100
+          max_total_size,  #maximum detections   100
           masks=per_image_masks,
           clip_window=clip_window,
           change_coordinate_frame=change_coordinate_frame)
