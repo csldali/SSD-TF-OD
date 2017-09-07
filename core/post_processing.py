@@ -133,7 +133,7 @@ def multiclass_non_max_suppression(boxes,
       if additional_fields is not None:
         for key, tensor in additional_fields.items():
           boxlist_and_class_scores.add_field(key, tensor)
-      boxlist_filtered = box_list_ops.filter_greater_than(
+      boxlist_filtered = box_list_ops.filter_greater_than(  #filtering the predicted boxes lesser than the score treshold value 
           boxlist_and_class_scores, score_thresh)
       if clip_window is not None:
         boxlist_filtered = box_list_ops.clip_to_window(
@@ -143,11 +143,11 @@ def multiclass_non_max_suppression(boxes,
               boxlist_filtered, clip_window)
       max_selection_size = tf.minimum(max_size_per_class,
                                       boxlist_filtered.num_boxes())
-      selected_indices = tf.image.non_max_suppression(
+      selected_indices = tf.image.non_max_suppression( #applying not maxima supression 
           boxlist_filtered.get(),
           boxlist_filtered.get_field(fields.BoxListFields.scores),
           max_selection_size,
-          iou_threshold=iou_thresh)
+          iou_threshold=iou_thresh)  #to remove the same thing hat is 
       nms_result = box_list_ops.gather(boxlist_filtered, selected_indices)
       nms_result.add_field(
           fields.BoxListFields.classes, (tf.zeros_like(
