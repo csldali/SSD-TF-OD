@@ -139,14 +139,20 @@ model {
       localization_weight: 1.0
     }
     normalize_loss_by_num_matches: true  #we devide by the matching anchors as in the paper 
-    post_processing {                    #not much for the accuracy this has a huge effect on effiecny of the inference it's good to keep like this
-      batch_non_max_suppression {                    #this is use to build non max supresser 
-        score_threshold: 1e-8   #low scoring boxes are removed -I think this is the jarcard similirity 
-        iou_threshold: 0.6           #treshhold for two bounding boxes 
-        max_detections_per_class: 100  #To apply nms 
+
+
+#From 148 - 156  We use parameters to play around output we get in the INFERENCE 
+
+
+
+    post_processing {  # Has an effect on effiecny of the inference .
+      batch_non_max_suppression {               #this is use to build non max supresser 
+        score_threshold: 1e-8   #low scoring boxes are removed  , This is like a score confident to each bounding box 
+        iou_threshold: 0.6      #This is to remove the duplicate boudning boxes in side the NMS 
+        max_detections_per_class: 100  # Per a class how many detections we take acoding to the probability score 
         max_total_detections: 100 #how many we keep as detectors 
       }
-      score_converter: SIGMOID              ###can we use softmax ? 
+      score_converter: SIGMOID  #we use sigmoid score for each preduicted class in a bounding box 
     }
   }
 }
